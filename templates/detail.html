@@ -8,11 +8,13 @@
     <p class="number">NATIONAL DEX #{{ "%03d"|format(pokemon.id) }}</p>
     <h1>{{ chinese_name or pokemon.name|capitalize }}</h1>
     {% if chinese_name %}<p class="english-name">{{ pokemon.name|capitalize }}</p>{% endif %}
-    <div class="types">{% for item in pokemon.types|sort(attribute='slot') %}<span class="type">{{ item.type.name|capitalize }}</span>{% endfor %}</div>
+    <div class="types" aria-label="屬性">{% for item in pokemon.types|sort(attribute='slot') %}<span class="type type-{{ item.type.name }}">{{ item.type.name|capitalize }}</span>{% endfor %}</div>
     <div class="measurements"><div><span>身高</span><strong>{{ pokemon.height / 10 }} m</strong></div><div><span>體重</span><strong>{{ pokemon.weight / 10 }} kg</strong></div></div>
-    <section><h2>基礎能力值</h2><div class="stats">{% for item in pokemon.stats %}<div class="stat"><span>{{ item.stat.name|replace('-', ' ')|capitalize }}</span><strong>{{ item.base_stat }}</strong></div>{% endfor %}</div></section>
-    <section><h2>特性</h2><p>{{ abilities|join('、') or '暫無資料' }}</p></section>
-    <section><h2>招式摘要</h2><p>{{ moves|join('、') or '暫無資料' }}{% if pokemon.moves|length > moves|length %} 等{% endif %}</p></section>
+    <section><h2>基礎能力值</h2><div class="stats">{% for item in pokemon.stats %}<div class="stat"><div class="stat-head"><span>{{ item.stat.name|replace('-', ' ')|capitalize }}</span><strong>{{ item.base_stat }}</strong></div><div class="stat-track"><span style="width: {{ [item.base_stat / 255 * 100, 100]|min }}%"></span></div></div>{% endfor %}</div></section>
+    <div class="summary-grid">
+      <section><h2>特性</h2><p>{{ abilities|join('、') or '暫無資料' }}</p></section>
+      <section><h2>招式摘要</h2><p>{{ moves|join('、') or '暫無資料' }}{% if pokemon.moves|length > moves|length %} 等{% endif %}</p></section>
+    </div>
   </div>
 </article>
 {% endblock %}
