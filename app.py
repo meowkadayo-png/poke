@@ -10,7 +10,7 @@ from typing import Any
 import requests
 from flask import Flask, redirect, render_template, request, url_for
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="public/static")
 API_ROOT = "https://pokeapi.co/api/v2"
 PAGE_SIZE_DEFAULT = 20
 PAGE_SIZE_MAX = 100
@@ -175,5 +175,3 @@ def not_found(_error):
 
 if __name__ == "__main__":
     app.run(debug=False)
-
-git status

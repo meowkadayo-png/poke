@@ -21,7 +21,7 @@ python app.py
 app.py                 Flask 路由、PokéAPI 呼叫與短期快取
 api/index.py           Vercel Python Function 入口
 templates/             Jinja2 頁面模板
-static/style.css       響應式樣式
+public/static/style.css  響應式樣式；本機與 Vercel 共用此檔
 requirements.txt       Python 套件需求
 vercel.json            Vercel 建置與路由設定
 .gitignore             排除虛擬環境、快取及本機設定
@@ -48,7 +48,7 @@ git push -u origin main
 
 1. 登入 Vercel，選擇 **Add New → Project**，匯入此 GitHub 儲存庫。
 2. 專案根目錄保持為儲存庫根目錄，使用預設 Python 設定。
-3. 選擇 **Deploy**；`vercel.json` 會將網站路由交給 `api/index.py`。
+3. 選擇 **Deploy**。Vercel 自動偵測根目錄的 Flask `app.py`；`public/` 中的 CSS 由 Vercel 靜態 CDN 提供。
 4. 部署完成後，用 Vercel 提供的網址開啟網站。
 
 部署需要你自己的 GitHub/Vercel 帳號授權。請勿將密碼或存取權杖提交到儲存庫。
