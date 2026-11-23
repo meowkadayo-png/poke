@@ -18,6 +18,15 @@ CACHE_TTL_SECONDS = 300
 _cache: dict[str, tuple[float, Any]] = {}
 _cache_lock = threading.Lock()
 
+STAT_LABELS = {
+    "hp": "HP",
+    "attack": "攻擊",
+    "defense": "防禦",
+    "special-attack": "特攻",
+    "special-defense": "特防",
+    "speed": "速度",
+}
+
 
 class PokeAPIError(Exception):
     """A friendly, expected failure while contacting PokéAPI."""
@@ -56,6 +65,20 @@ def _image_for(pokemon: dict[str, Any]) -> str:
     return official.get("front_default") or sprites.get("front_default") or ""
 
 
+def _extract_stats(pokemon: dict[str, Any]) -> list[dict[str, Any]]:
+    result: list[dict[str, Any]] = []
+    for item in pokemon.get("stats", []):
+        raw_name = (item.get("stat") or {}).get("name", "")
+        base_val = int(item.get("base_stat", 0))
+        result.append({
+            "key": raw_name,
+            "label": STAT_LABELS.get(raw_name, raw_name),
+            "value": base_val,
+            "percent": min(max(round(base_val / 255 * 100), 4), 100),
+        })
+    return result
+
+
 @app.get("/")
 def index():
     try:
@@ -67,14 +90,25 @@ def index():
         data = _get_json(f"pokemon?limit={limit}&offset={offset}")
     except PokeAPIError as exc:
         return render_template("error.html", message=str(exc)), 503
-    entries = [
-        {"id": _pokemon_id(item["url"]), "name": item["name"],
-         "image": f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{_pokemon_id(item['url'])}.png"}
-        for item in data.get("results", [])
-    ]
+    entries = []
+    for item in data.get("results", []):
+        pid = _pokemon_id(item.get("url", ""))
+        entries.append({
+            "id": pid,
+            "name": item.get("name", ""),
+            "image": (
+                f"https://raw.githubusercontent.com/PokeAPI/sprites/master/"
+                f"sprites/pokemon/other/official-artwork/{pid}.png"
+                if pid > 0 else ""
+            ),
+        })
     return render_template(
-        "index.html", pokemon=entries, limit=limit, offset=offset,
-        total=data.get("count", 0), previous=offset > 0,
+        "index.html",
+        pokemon=entries,
+        limit=limit,
+        offset=offset,
+        total=data.get("count", 0),
+        previous=offset > 0,
         next_page=offset + limit < data.get("count", 0),
     )
 
@@ -98,6 +132,7 @@ def detail(identifier: str):
     except PokeAPIError as exc:
         code = 404 if "找不到" in str(exc) else 503
         return render_template("error.html", message=str(exc)), code
+
     chinese_name = None
     species_url = (pokemon.get("species") or {}).get("url", "")
     species_match = re.search(r"/pokemon-species/(\d+)/?$", species_url)
@@ -106,15 +141,31 @@ def detail(identifier: str):
         try:
             species = _get_json(f"pokemon-species/{species_id}")
             for item in species.get("names", []):
-                if item.get("language", {}).get("name") == "zh-Hant":
+                if (item.get("language") or {}).get("name") == "zh-Hant":
                     chinese_name = item.get("name")
                     break
         except PokeAPIError:
             pass
-    abilities = [item["ability"]["name"].replace("-", " ") for item in pokemon.get("abilities", [])]
-    moves = [item["move"]["name"].replace("-", " ") for item in pokemon.get("moves", [])[:8]]
-    return render_template("detail.html", pokemon=pokemon, image=_image_for(pokemon),
-                           chinese_name=chinese_name, abilities=abilities, moves=moves)
+
+    types = [(t.get("type") or {}).get("name", "") for t in pokemon.get("types", [])]
+    abilities = [(a.get("ability") or {}).get("name", "").replace("-", " ") for a in pokemon.get("abilities", [])]
+    moves = [(m.get("move") or {}).get("name", "").replace("-", " ") for m in pokemon.get("moves", [])[:8]]
+    height_m = round(int(pokemon.get("height") or 0) / 10, 1)
+    weight_kg = round(int(pokemon.get("weight") or 0) / 10, 1)
+    stats = _extract_stats(pokemon)
+
+    return render_template(
+        "detail.html",
+        pokemon=pokemon,
+        image=_image_for(pokemon),
+        chinese_name=chinese_name,
+        types=types,
+        abilities=abilities,
+        moves=moves,
+        height_m=height_m,
+        weight_kg=weight_kg,
+        stats=stats,
+    )
 
 
 @app.errorhandler(404)
@@ -124,28 +175,3 @@ def not_found(_error):
 
 if __name__ == "__main__":
     app.run(debug=False)
-
-def _format_number(poke_id: int) -> str:
-    return f"#{poke_id:04d}" if poke_id > 0 else "#????"
-
-
-def _extract_stats(pokemon: dict[str, Any]) -> list[dict[str, Any]]:
-    stat_labels = {
-        "hp": "HP",
-        "attack": "攻擊",
-        "defense": "防禦",
-        "special-attack": "特攻",
-        "special-defense": "特防",
-        "speed": "速度",
-    }
-    parsed = []
-    for item in pokemon.get("stats", []):
-        raw_name = (item.get("stat") or {}).get("name", "")
-        base_val = int(item.get("base_stat", 0))
-        parsed.append({
-            "key": raw_name,
-            "label": stat_labels.get(raw_name, raw_name),
-            "value": base_val,
-            "percent": min(max(round(base_val / 255 * 100), 4), 100),
-        })
-    return parsed
