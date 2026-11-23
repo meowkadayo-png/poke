@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}找不到資料｜寶可夢圖鑑{% endblock %}
+{% block content %}
+<section class="error-panel"><span class="error-icon" aria-hidden="true">?</span><h1>暫時無法顯示</h1><p>{{ message }}</p><a class="button" href="{{ url_for('index') }}">返回圖鑑首頁</a></section>
+{% endblock %}
