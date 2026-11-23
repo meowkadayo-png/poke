@@ -6,182 +6,34 @@
   <h1>認識每一隻寶可夢</h1>
   <p>瀏覽圖鑑，或搜尋英文名稱與全國圖鑑編號。</p>
 </section>
-<div class="list-heading"><h2>圖鑑清單</h2><span>{{ offset + 1 if total else 0 }}–{{ [offset + pokemon|length, total]|min }} / {{ total }}</span></div>
+
+<div class="list-heading">
+  <h2>圖鑑清單</h2>
+  <span>{{ offset + 1 if total else 0 }}–{{ [offset + pokemon|length, total]|min }} / {{ total }}</span>
+</div>
+
 <section class="grid" aria-label="寶可夢清單">
-{% for item in pokemon %}
-  <a class="card" href="{{ url_for('detail', identifier=item.id) }}">
-    <span class="number">#{{ "%03d"|format(item.id) }}</span>
-    <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
-    <h3>{{ item.name|capitalize }}</h3>
-  </a>
-{% else %}<p>目前沒有可顯示的項目。</p>{% endfor %}
+  {% for item in pokemon %}
+    <a class="card" href="{{ url_for('detail', identifier=item.id) }}">
+      <span class="number">#{{ "%03d"|format(item.id) }}</span>
+      {% if item.image %}
+        <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+      {% endif %}
+      <h3>{{ item.name|replace('-', ' ')|capitalize }}</h3>
+    </a>
+  {% else %}
+    <p>目前沒有可顯示的項目。</p>
+  {% endfor %}
 </section>
+
 <nav class="pagination" aria-label="圖鑑分頁">
-  {% if previous %}<a class="button secondary" href="{{ url_for('index', limit=limit, offset=offset-limit) }}">← 上一頁</a>{% else %}<span></span>{% endif %}
-  {% if next_page %}<a class="button" href="{{ url_for('index', limit=limit, offset=offset+limit) }}">下一頁 →</a>{% endif %}
+  {% if previous %}
+    <a class="button secondary" href="{{ url_for('index', limit=limit, offset=offset-limit) }}">← 上一頁</a>
+  {% else %}
+    <span></span>
+  {% endif %}
+  {% if next_page %}
+    <a class="button" href="{{ url_for('index', limit=limit, offset=offset+limit) }}">下一頁 →</a>
+  {% endif %}
 </nav>
 {% endblock %}
-
-:root {
-  --bg: #F2EFE9;
-  --surface: #FFFFFF;
-  --surface-soft: #FAF7FC;
-  --ink: #1E1B24;
-  --muted: #665F73;
-  --accent: #A934F2;
-  --accent-soft: #FDD8FF;
-  --accent-mid: #F3C1F9;
-  --border: #E5DFEC;
-  --radius: 16px;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
-  line-height: 1.6;
-}
-
-main,
-header,
-nav,
-section,
-div {
-  max-width: 1120px;
-  margin-inline: auto;
-}
-
-.intro {
-  margin-top: 24px;
-  padding: 28px 24px;
-  background: linear-gradient(135deg, var(--surface) 0%, var(--surface-soft) 100%);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.eyebrow {
-  margin: 0 0 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-}
-
-.intro h1 {
-  margin: 0 0 8px;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-}
-
-.intro p {
-  margin: 0;
-  color: var(--muted);
-}
-
-.list-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 28px auto 14px;
-  padding-inline: 4px;
-}
-
-.list-heading h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.list-heading span {
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
-  gap: 16px;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 14px 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent-mid);
-  box-shadow: 0 10px 24px rgba(169, 52, 242, 0.1);
-}
-
-.number {
-  align-self: flex-start;
-  padding: 2px 9px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.card img {
-  width: 112px;
-  height: 112px;
-  object-fit: contain;
-}
-
-.card h3 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 28px auto 48px;
-  padding-inline: 4px;
-}
-
-.button {
-  display: inline-block;
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #FFFFFF;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.92rem;
-}
-
-.button.secondary {
-  background: var(--surface);
-  color: var(--ink);
-  border: 1px solid var(--border);
-}
-
-@media (max-width: 520px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .card img {
-    width: 88px;
-    height: 88px;
-  }
-}
