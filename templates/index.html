@@ -1,3 +1,27 @@
+{% extends "base.html" %}
+{% block title %}寶可夢圖鑑｜Pokédex{% endblock %}
+{% block content %}
+<section class="intro">
+  <p class="eyebrow">POKÉDEX</p>
+  <h1>認識每一隻寶可夢</h1>
+  <p>瀏覽圖鑑，或搜尋英文名稱與全國圖鑑編號。</p>
+</section>
+<div class="list-heading"><h2>圖鑑清單</h2><span>{{ offset + 1 if total else 0 }}–{{ [offset + pokemon|length, total]|min }} / {{ total }}</span></div>
+<section class="grid" aria-label="寶可夢清單">
+{% for item in pokemon %}
+  <a class="card" href="{{ url_for('detail', identifier=item.id) }}">
+    <span class="number">#{{ "%03d"|format(item.id) }}</span>
+    <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy">
+    <h3>{{ item.name|capitalize }}</h3>
+  </a>
+{% else %}<p>目前沒有可顯示的項目。</p>{% endfor %}
+</section>
+<nav class="pagination" aria-label="圖鑑分頁">
+  {% if previous %}<a class="button secondary" href="{{ url_for('index', limit=limit, offset=offset-limit) }}">← 上一頁</a>{% else %}<span></span>{% endif %}
+  {% if next_page %}<a class="button" href="{{ url_for('index', limit=limit, offset=offset+limit) }}">下一頁 →</a>{% endif %}
+</nav>
+{% endblock %}
+
 :root {
   --bg: #F2EFE9;
   --surface: #FFFFFF;
