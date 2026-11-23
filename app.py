@@ -124,3 +124,28 @@ def not_found(_error):
 
 if __name__ == "__main__":
     app.run(debug=False)
+
+def _format_number(poke_id: int) -> str:
+    return f"#{poke_id:04d}" if poke_id > 0 else "#????"
+
+
+def _extract_stats(pokemon: dict[str, Any]) -> list[dict[str, Any]]:
+    stat_labels = {
+        "hp": "HP",
+        "attack": "攻擊",
+        "defense": "防禦",
+        "special-attack": "特攻",
+        "special-defense": "特防",
+        "speed": "速度",
+    }
+    parsed = []
+    for item in pokemon.get("stats", []):
+        raw_name = (item.get("stat") or {}).get("name", "")
+        base_val = int(item.get("base_stat", 0))
+        parsed.append({
+            "key": raw_name,
+            "label": stat_labels.get(raw_name, raw_name),
+            "value": base_val,
+            "percent": min(max(round(base_val / 255 * 100), 4), 100),
+        })
+    return parsed
