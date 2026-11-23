@@ -1,20 +1,75 @@
 {% extends "base.html" %}
-{% block title %}{{ pokemon.name|capitalize }}｜寶可夢圖鑑{% endblock %}
+{% block title %}{{ chinese_name or (pokemon.name|capitalize) }}｜Pokédex{% endblock %}
 {% block content %}
-<a class="back-link" href="{{ url_for('index') }}">← 返回圖鑑</a>
-<article class="detail-card">
-  <div class="hero-image"><img src="{{ image }}" alt="{{ pokemon.name }}"></div>
-  <div class="detail-copy">
-    <p class="number">NATIONAL DEX #{{ "%03d"|format(pokemon.id) }}</p>
-    <h1>{{ chinese_name or pokemon.name|capitalize }}</h1>
-    {% if chinese_name %}<p class="english-name">{{ pokemon.name|capitalize }}</p>{% endif %}
-    <div class="types" aria-label="屬性">{% for item in pokemon.types|sort(attribute='slot') %}<span class="type type-{{ item.type.name }}">{{ item.type.name|capitalize }}</span>{% endfor %}</div>
-    <div class="measurements"><div><span>身高</span><strong>{{ pokemon.height / 10 }} m</strong></div><div><span>體重</span><strong>{{ pokemon.weight / 10 }} kg</strong></div></div>
-    <section><h2>基礎能力值</h2><div class="stats">{% for item in pokemon.stats %}<div class="stat"><div class="stat-head"><span>{{ item.stat.name|replace('-', ' ')|capitalize }}</span><strong>{{ item.base_stat }}</strong></div><div class="stat-track"><span style="width: {{ [item.base_stat / 255 * 100, 100]|min }}%"></span></div></div>{% endfor %}</div></section>
-    <div class="summary-grid">
-      <section><h2>特性</h2><p>{{ abilities|join('、') or '暫無資料' }}</p></section>
-      <section><h2>招式摘要</h2><p>{{ moves|join('、') or '暫無資料' }}{% if pokemon.moves|length > moves|length %} 等{% endif %}</p></section>
+<div class="top-actions">
+  <a class="button secondary" href="{{ url_for('index') }}">← 回到圖鑑首頁</a>
+</div>
+
+<section class="detail-card">
+  <div class="detail-visual">
+    <span class="number">#{{ "%03d"|format(pokemon.id) }}</span>
+    {% if image %}
+      <img src="{{ image }}" alt="{{ pokemon.name }}">
+    {% endif %}
+  </div>
+
+  <div class="detail-info">
+    <p class="eyebrow">{{ pokemon.name|replace('-', ' ')|upper }}</p>
+    <h1>{{ chinese_name or (pokemon.name|replace('-', ' ')|capitalize) }}</h1>
+
+    <div class="badges">
+      {% for t in types %}
+        <span class="badge">{{ t }}</span>
+      {% endfor %}
+    </div>
+
+    <dl class="meta-grid">
+      <div>
+        <dt>身高</dt>
+        <dd>{{ height_m }} m</dd>
+      </div>
+      <div>
+        <dt>體重</dt>
+        <dd>{{ weight_kg }} kg</dd>
+      </div>
+    </dl>
+
+    <div class="block">
+      <h2>基礎能力值</h2>
+      <div class="stats-list">
+        {% for s in stats %}
+          <div class="stat-row">
+            <span class="stat-label">{{ s.label }}</span>
+            <span class="stat-value">{{ s.value }}</span>
+            <div class="stat-track">
+              <div class="stat-fill" style="width: {{ s.percent }}%;"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="block">
+      <h2>特性</h2>
+      <div class="chips">
+        {% for ab in abilities %}
+          <span class="chip">{{ ab }}</span>
+        {% else %}
+          <span>無資料</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="block">
+      <h2>部分招式</h2>
+      <div class="chips">
+        {% for mv in moves %}
+          <span class="chip">{{ mv }}</span>
+        {% else %}
+          <span>無資料</span>
+        {% endfor %}
+      </div>
     </div>
   </div>
-</article>
+</section>
 {% endblock %}
