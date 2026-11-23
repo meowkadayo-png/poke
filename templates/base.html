@@ -3,20 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#e84949">
-  <title>{% block title %}寶可夢圖鑑{% endblock %}</title>
+  <title>{% block title %}寶可夢圖鑑｜Pokédex{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="{{ url_for('index') }}"><span aria-hidden="true">◉</span> 寶可夢圖鑑</a>
-    <form class="search" action="{{ url_for('search') }}" method="get">
-      <label class="sr-only" for="q">搜尋寶可夢名稱或編號</label>
-      <input id="q" name="q" type="search" placeholder="名稱或圖鑑編號" required>
-      <button type="submit">搜尋</button>
-    </form>
+    <div class="header-inner">
+      <a class="brand" href="{{ url_for('index') }}">Pokédex 圖鑑</a>
+      <form class="search-form" action="{{ url_for('search') }}" method="get">
+        <input
+          type="search"
+          name="q"
+          placeholder="輸入英文名稱或編號（如 pikachu、25）"
+          aria-label="搜尋寶可夢英文名稱或編號"
+          required
+        >
+        <button type="submit">搜尋</button>
+      </form>
+    </div>
   </header>
-  <main>{% block content %}{% endblock %}</main>
-  <footer>資料來源：<a href="https://pokeapi.co/" rel="noreferrer">PokéAPI</a></footer>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
 </body>
 </html>
